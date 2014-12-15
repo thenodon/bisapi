@@ -32,7 +32,6 @@ import org.bischeck.bisapi.rest.Metric;
 import org.bischeck.bisapi.rest.Notification;
 import org.bischeck.bisapi.rest.State;
 
-import redis.clients.jedis.JedisPool;
 
 import com.codahale.metrics.Timer;
 import com.google.common.base.Optional;
@@ -47,13 +46,6 @@ public class ApiServer {
 	public static void main(String[] args) throws Exception {
 		int port = Integer.valueOf(Optional.fromNullable(System.getenv("PORT"))
 				.or("9080"));
-
-		/*
-		 * load mode from system property if defined, or default to dev be
-		 * careful with that setting, if you use this class to launch your
-		 * server in production, make sure to launch it with -Drestx.mode=prod
-		 * or change the default here
-		 */
 
 		JedisPoolWrapper jedisPool = JedisModule.datasource();
 
