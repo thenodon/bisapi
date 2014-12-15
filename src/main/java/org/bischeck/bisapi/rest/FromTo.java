@@ -47,6 +47,7 @@ public class FromTo {
 			throw new IllegalArgumentException(
 					"From must be  >= 0 or empty and to must be empty, -1 or >= 0");
 		}
+		this.offset = to - from + 1;
 	}
 
 	public FromTo(FromTo fromto) {
@@ -110,11 +111,11 @@ public class FromTo {
 
 	}
 
-	public void inc(int i) {
-		from = to + 1;
-		to = from + i;
-
-	}
+//	public void inc(int i) {
+//		from = to + 1;
+//		to = from + i;
+//
+//	}
 
 	public Integer offset() {
 		return offset;
