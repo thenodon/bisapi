@@ -18,6 +18,8 @@
  */
 package org.bischeck.bisapi;
 
+import java.util.Optional;
+
 import org.bischeck.bisapi.domain.Key;
 import org.bischeck.bisapi.domain.Message;
 import org.bischeck.bisapi.domain.StateMessage;
@@ -32,9 +34,9 @@ import org.bischeck.bisapi.rest.Metric;
 import org.bischeck.bisapi.rest.Notification;
 import org.bischeck.bisapi.rest.State;
 
+import spark.SparkBase;
 
 import com.codahale.metrics.Timer;
-import com.google.common.base.Optional;
 
 import static spark.Spark.*;
 
@@ -44,16 +46,12 @@ public class ApiServer {
 	private static String baseUrl;
 
 	public static void main(String[] args) throws Exception {
-		int port = Integer.valueOf(Optional.fromNullable(System.getenv("PORT"))
-				.or("9080"));
+		int port = Integer.valueOf(Optional.ofNullable(System.getenv("PORT"))
+				.orElse(Integer.toString(SPARK_DEFAULT_PORT)));
+
+		SparkBase.setPort(port);
 
 		JedisPoolWrapper jedisPool = JedisModule.datasource();
-
-		// TODO Hard code appUrl needs to be fixed
-		System.setProperty("appUrl", System.getProperty("/api", "/api"));
-		System.setProperty("restx.mode",
-				System.getProperty("restx.mode", "dev"));
-		System.setProperty("restx.app.package", "org.bischeck.bisapi");
 
 		exception(ApiException.class, (e, request, response) -> {
 			response.type("application/json");
@@ -92,13 +90,13 @@ public class ApiServer {
 					Message mesg = null;
 					try {
 						Metric metric = new Metric(jedisPool);
-						Optional<String> f = Optional.fromNullable(request
+						Optional<String> f = Optional.ofNullable(request
 								.queryParams("f"));
-						Optional<String> q = Optional.fromNullable(request
+						Optional<String> q = Optional.ofNullable(request
 								.queryParams("q"));
-						Optional<String> from = Optional.fromNullable(request
+						Optional<String> from = Optional.ofNullable(request
 								.queryParams("from"));
-						Optional<String> to = Optional.fromNullable(request
+						Optional<String> to = Optional.ofNullable(request
 								.queryParams("to"));
 
 						mesg = metric.metric(request.params(":key"), f, q,
@@ -125,13 +123,13 @@ public class ApiServer {
 					Message mesg = null;
 					try {
 						State state = new State(jedisPool);
-						Optional<String> f = Optional.fromNullable(request
+						Optional<String> f = Optional.ofNullable(request
 								.queryParams("f"));
-						Optional<String> q = Optional.fromNullable(request
+						Optional<String> q = Optional.ofNullable(request
 								.queryParams("q"));
-						Optional<String> from = Optional.fromNullable(request
+						Optional<String> from = Optional.ofNullable(request
 								.queryParams("from"));
-						Optional<String> to = Optional.fromNullable(request
+						Optional<String> to = Optional.ofNullable(request
 								.queryParams("to"));
 
 						mesg = state.state(request.params(":key"), f, q, from,
@@ -255,13 +253,13 @@ public class ApiServer {
 					Message mesg = null;
 					try {
 						Notification notification = new Notification(jedisPool);
-						Optional<String> f = Optional.fromNullable(request
+						Optional<String> f = Optional.ofNullable(request
 								.queryParams("f"));
-						Optional<String> q = Optional.fromNullable(request
+						Optional<String> q = Optional.ofNullable(request
 								.queryParams("q"));
-						Optional<String> from = Optional.fromNullable(request
+						Optional<String> from = Optional.ofNullable(request
 								.queryParams("from"));
-						Optional<String> to = Optional.fromNullable(request
+						Optional<String> to = Optional.ofNullable(request
 								.queryParams("to"));
 
 						mesg = notification.notification(

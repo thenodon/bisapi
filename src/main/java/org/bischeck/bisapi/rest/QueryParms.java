@@ -21,43 +21,42 @@ package org.bischeck.bisapi.rest;
 
 import java.util.Arrays;
 import java.util.List;
-
-import com.google.common.base.Optional;
+import java.util.Optional;
 
 public class QueryParms {
 
-    List<String> filters;
-    List<String> queries;
+	List<String> filters;
+	List<String> queries;
 
-    public QueryParms(Optional<String> f, Optional<String> q) {
-        filters = initList(f);
-        queries = initList(q);
-    }
+	public QueryParms(Optional<String> f, Optional<String> q) {
+		filters = initList(f);
+		queries = initList(q);
+	}
 
-    private List<String> initList(Optional<String> listStr) {
-        List<String> list;
-        if (listStr.isPresent()) {
-            list = Arrays.asList(listStr.get().split("\\s*,\\s*"));
-        } else {
-            list = Arrays.asList();
-        }
-        return list;
-    }
+	private List<String> initList(Optional<String> listStr) {
+		List<String> list;
+		if (listStr.isPresent()) {
+			list = Arrays.asList(listStr.get().split("\\s*,\\s*"));
+		} else {
+			list = Arrays.asList();
+		}
+		return list;
+	}
 
-    public boolean hasFilters() {
-        return !filters.isEmpty();
-    }
+	public boolean hasFilters() {
+		return !filters.isEmpty();
+	}
 
-    public boolean hasQuery() {
-        return !queries.isEmpty();
-    }
+	public boolean hasQuery() {
+		return !queries.isEmpty();
+	}
 
-    public List<String> getFields() {
-        return filters;
-    }
+	public List<String> getFields() {
+		return filters;
+	}
 
-    public List<String> getQueries() {
-        return queries;
-    }
+	public List<String> getQueries() {
+		return queries;
+	}
 
 }

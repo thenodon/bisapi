@@ -21,6 +21,7 @@ package org.bischeck.bisapi.rest;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -33,8 +34,6 @@ import org.bischeck.bisapi.rest.filters.FilterFactory;
 import org.bischeck.bisapi.rest.filters.FilterInf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
 
 import redis.clients.jedis.Jedis;
 
@@ -50,7 +49,6 @@ public class State {
 		this.jedisPool = jedisPool;
 	}
 
-	
 	public Message state(String key, Optional<String> f, Optional<String> q,
 			Optional<String> from, Optional<String> to) throws ApiException {
 
@@ -66,7 +64,7 @@ public class State {
 		LOGGER.debug("Key : {} ", decodedKey);
 
 		Message message = null;
-	
+
 		try {
 			FilterInf filter = FilterFactory.getFilter(KEYHEAD + decodedKey,
 					jedisPool);
@@ -77,7 +75,7 @@ public class State {
 			message = filter.execute(params, fromto);
 			message.setLinks(Util.getAllMetricLinks(decodedKey,
 					LabelText.STATE_KEY, jedisPool));
-			
+
 		} catch (IllegalArgumentException e) {
 			LOGGER.info("Illegal from {} to {} specification", from, to, e);
 			throw new ApiException("from=" + from + "to=" + to, new ApiError(

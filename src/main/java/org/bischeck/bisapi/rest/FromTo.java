@@ -19,104 +19,104 @@
 
 package org.bischeck.bisapi.rest;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 
 public class FromTo {
-    private static final Integer FROM_DEFAULT = 0;
-    private static final Integer TO_DEFAULT = 99;
+	private static final Integer FROM_DEFAULT = 0;
+	private static final Integer TO_DEFAULT = 99;
 
-    private Integer from;
-    private Integer to;
-    private Integer offset;
+	private Integer from;
+	private Integer to;
+	private Integer offset;
 
-    public FromTo(Optional<String> from, Optional<String> to) {
+	public FromTo(Optional<String> from, Optional<String> to) {
 
-        this.from = validateFrom(from);
-        this.to = validateTo(this.from, to);
-        if (this.from < 0 || this.to < -1) {
-            throw new IllegalArgumentException(
-                    "From must be  >= 0 or empty and to must be empty, -1 or >= 0");
-        }
-    }
+		this.from = validateFrom(from);
+		this.to = validateTo(this.from, to);
+		if (this.from < 0 || this.to < -1) {
+			throw new IllegalArgumentException(
+					"From must be  >= 0 or empty and to must be empty, -1 or >= 0");
+		}
+	}
 
-    public FromTo(Integer from, Integer to) {
+	public FromTo(Integer from, Integer to) {
 
-        this.from = from;
-        this.to = to;
-        if (this.from < 0 || this.to < -1) {
-            throw new IllegalArgumentException(
-                    "From must be  >= 0 or empty and to must be empty, -1 or >= 0");
-        }
-    }
+		this.from = from;
+		this.to = to;
+		if (this.from < 0 || this.to < -1) {
+			throw new IllegalArgumentException(
+					"From must be  >= 0 or empty and to must be empty, -1 or >= 0");
+		}
+	}
 
-    public FromTo(FromTo fromto) {
-        this.from = fromto.getFrom();
-        this.to = fromto.getTo();
-    }
+	public FromTo(FromTo fromto) {
+		this.from = fromto.getFrom();
+		this.to = fromto.getTo();
+	}
 
-    public FromTo(FromTo fromto, int inc) {
-        this.from = fromto.getTo() + 1;
-        this.to = this.from + inc; 
-    }
-    
-    private Integer validateTo(Integer from, Optional<String> to) {
-        if (to.isPresent()) {
-            String toStr = to.get().trim();
+	public FromTo(FromTo fromto, int inc) {
+		this.from = fromto.getTo() + 1;
+		this.to = this.from + inc;
+	}
 
-            if (isOffSet(toStr)) {
-                offset = Integer.valueOf(toStr.substring(1).trim());
-                return getCount(from, toStr);
-            } else {
-                offset = getPos(toStr) - from + 1; 
-                return getPos(toStr);
-            }
-        } else {
-            offset = TO_DEFAULT+1;
-            return from + TO_DEFAULT;
-        }
-    }
+	private Integer validateTo(Integer from, Optional<String> to) {
+		if (to.isPresent()) {
+			String toStr = to.get().trim();
 
-    private Integer validateFrom(Optional<String> from) {
-        if (from.isPresent()) {
-            return Integer.valueOf(from.get().trim());
-        } else {
-            return FROM_DEFAULT;
-        }
-    }
+			if (isOffSet(toStr)) {
+				offset = Integer.valueOf(toStr.substring(1).trim());
+				return getCount(from, toStr);
+			} else {
+				offset = getPos(toStr) - from + 1;
+				return getPos(toStr);
+			}
+		} else {
+			offset = TO_DEFAULT + 1;
+			return from + TO_DEFAULT;
+		}
+	}
 
-    public Integer getFrom() {
-        return from;
-    }
+	private Integer validateFrom(Optional<String> from) {
+		if (from.isPresent()) {
+			return Integer.valueOf(from.get().trim());
+		} else {
+			return FROM_DEFAULT;
+		}
+	}
 
-    public Integer getTo() {
-        return to;
-    }
+	public Integer getFrom() {
+		return from;
+	}
 
-    private boolean isOffSet(String toStr) {
+	public Integer getTo() {
+		return to;
+	}
 
-        if (toStr.length() > 0 && toStr.charAt(0) == '+') {
-            return true;
-        }
+	private boolean isOffSet(String toStr) {
 
-        return false;
-    }
+		if (toStr.length() > 0 && toStr.charAt(0) == '+') {
+			return true;
+		}
 
-    private Integer getPos(String toStr) {
-        return Integer.valueOf(toStr);
-    }
+		return false;
+	}
 
-    private Integer getCount(Integer fromIndex, String toIndexStr) {
-        return fromIndex + Integer.valueOf(toIndexStr.substring(1).trim()) - 1;
+	private Integer getPos(String toStr) {
+		return Integer.valueOf(toStr);
+	}
 
-    }
+	private Integer getCount(Integer fromIndex, String toIndexStr) {
+		return fromIndex + Integer.valueOf(toIndexStr.substring(1).trim()) - 1;
 
-    public void inc(int i) {
-        from = to + 1;
-        to = from + i;
+	}
 
-    }
+	public void inc(int i) {
+		from = to + 1;
+		to = from + i;
 
-    public Integer offset() {
-        return offset;
-    }
+	}
+
+	public Integer offset() {
+		return offset;
+	}
 }

@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -40,8 +41,6 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 
 import com.codahale.metrics.Timer;
-import com.google.common.base.Optional;
-import com.google.common.io.CharStreams;
 
 public class Metric {
 
@@ -143,7 +142,7 @@ public class Metric {
 	// postStatus.setProcessingTime(System.currentTimeMillis() - startTimer);
 	// return postStatus;
 	// }
-	
+
 	private Set<Link> getStateAndNotificationLinks(String key,
 			JedisPoolWrapper jedisPool2) {
 		Jedis jedis = null;
