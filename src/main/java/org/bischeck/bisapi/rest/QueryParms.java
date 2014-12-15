@@ -51,7 +51,7 @@ public class QueryParms {
 		return !queries.isEmpty();
 	}
 
-	public List<String> getFields() {
+	public List<String> getFilters() {
 		return filters;
 	}
 
