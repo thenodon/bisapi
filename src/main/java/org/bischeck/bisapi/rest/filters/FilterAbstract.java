@@ -75,214 +75,208 @@ import redis.clients.jedis.Jedis;
  */
 public abstract class FilterAbstract {
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(FilterAbstract.class);
-	private static final int INC_QUERY_SIZE = 500;
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(FilterAbstract.class);
+    private static final int INC_QUERY_SIZE = 500;
 
-	protected JedisPoolWrapper jedisPool;
-	protected String key;
+    protected JedisPoolWrapper jedisPool;
+    protected String key;
 
-	public FilterAbstract(String key, JedisPoolWrapper jedisPool) {
-		this.jedisPool = jedisPool;
-		this.key = key;
-	}
+    public FilterAbstract(String key, JedisPoolWrapper jedisPool) {
+        this.jedisPool = jedisPool;
+        this.key = key;
+    }
 
-	public Boolean keyExists(String key) {
+    public Boolean keyExists(String key) {
 
-		Jedis jedis = null;
-		try {
-			jedis = jedisPool.getResource();
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
 
-			if (jedis.exists(key)) {
-				return true;
-			}
-		} finally {
-			jedisPool.returnResource(jedis);
-		}
-		return false;
-	}
+            if (jedis.exists(key)) {
+                return true;
+            }
+        } finally {
+            jedisPool.returnResource(jedis);
+        }
+        return false;
+    }
 
-	public String keyType(String key) {
+    public String keyType(String key) {
 
-		Jedis jedis = null;
-		try {
-			jedis = jedisPool.getResource();
-			return jedis.type(key);
-		} finally {
-			jedisPool.returnResource(jedis);
-		}
-	}
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            return jedis.type(key);
+        } finally {
+            jedisPool.returnResource(jedis);
+        }
+    }
 
-	public Message execute(QueryParms params, FromTo fromto)
-			throws ApiException {
+    public Message execute(QueryParms params, FromTo fromto)
+            throws ApiException {
 
-		// DO ALL STUFF
-		Set<String> res = null;
+        // DO ALL STUFF
+        Set<String> res = null;
 
-		Message message = new Message(key);
+        Message message = new Message(key);
 
-		// First step - just the result set
-		res = readCacheSet(fromto);
-		message.setResult(res);
+        // First step - just the result set
+        res = readCacheSet(fromto);
+        message.setResult(res);
 
-		// Second step - apply query
-		if (params.hasQuery()) {
-			res = query(res, params.getQueries().get(0), fromto);
-			message.setResult(res);
-		}
+        // Second step - apply query
+        if (params.hasQuery()) {
+            res = query(res, params.getQueries().get(0), fromto);
+            message.setResult(res);
+        }
 
-		// Third step - remove fields
-		if (params.hasFilters()) {
-			res = filter(res, params.getFilters());
-			message.setResult(res);
-		}
+        // Third step - remove fields
+        if (params.hasFilters()) {
+            res = filter(res, params.getFilters());
+            message.setResult(res);
+        }
 
-		return message;
-	}
+        return message;
+    }
 
-	protected abstract Set<String> readCacheSet(FromTo fromto);
+    protected abstract Set<String> readCacheSet(FromTo fromto);
 
-	private Set<String> filter(Set<String> res, List<String> fields)
-			throws ApiException {
-		TreeSet<String> resultSet = new TreeSet<String>();
-		if (!res.isEmpty()) {
+    private Set<String> filter(Set<String> res, List<String> fields)
+            throws ApiException {
+        TreeSet<String> resultSet = new TreeSet<String>();
+        if (!res.isEmpty()) {
 
-			// Moved outside - super more efficient
-			ObjectMapper mapper = new ObjectMapper();
+            // Moved outside - super more efficient
+            ObjectMapper mapper = new ObjectMapper();
 
-			for (String row : res) {
+            for (String row : res) {
 
-				JsonNode node = null;
-				try {
-					node = mapper.readTree(row);
-				} catch (IOException e) {
-					LOGGER.error(
-							"Redis data should not be de-serialized at format: {}",
-							row, e);
-					// throw new APIException(row, Rules.ParsingRef.class);
-					throw new ApiException(row, new ApiError(
-							ErrorRef.PARSING_JSON, row));
-				}
+                JsonNode node = null;
+                try {
+                    node = mapper.readTree(row);
+                } catch (IOException e) {
+                    LOGGER.error(
+                            "Redis data should not be de-serialized at format: {}",
+                            row, e);
+                    throw new ApiException(row, new ApiError(
+                            ErrorRef.PARSING_JSON, row));
+                }
 
-				ObjectNode jNode = mapper.createObjectNode();
+                ObjectNode jNode = mapper.createObjectNode();
 
-				boolean setTimestamp = true;
+                boolean setTimestamp = true;
 
-				for (String field : fields) {
+                for (String field : fields) {
 
-					if (node.has(field)) {
-						if (setTimestamp) {
-							// Make sure that timestamp is always present
-							// otherwise set will not work
-							jNode.put("timestamp", node.get("timestamp"));
+                    if (node.has(field)) {
+                        if (setTimestamp) {
+                            // Make sure that timestamp is always present
+                            // otherwise set will not work
+                            jNode.set("timestamp", node.get("timestamp"));
 
-							setTimestamp = false;
-						}
+                            setTimestamp = false;
+                        }
 
-						jNode.put(field, node.get(field));
+                        jNode.set(field, node.get(field));
 
-					} else {
-						// throw new APIException(field, Rules.FieldRef.class);
-						throw new ApiException(field, new ApiError(
-								ErrorRef.FIELD, field));
-					}
-				}
-				resultSet.add(jNode.toString());
-			}
-		}
-		return resultSet.descendingSet();
-	}
+                    } else {
+                        throw new ApiException(field, new ApiError(
+                                ErrorRef.FIELD, field));
+                    }
+                }
+                resultSet.add(jNode.toString());
+            }
+        }
+        return resultSet.descendingSet();
+    }
 
-	private Set<String> query(Set<String> res, String query, FromTo fromto)
-			throws ApiException {
+    private Set<String> query(Set<String> res, String query, FromTo fromto)
+            throws ApiException {
 
-		Set<String> queryRes = res;
+        Set<String> queryRes = res;
 
-		FromTo fromTo = new FromTo(fromto);
+        FromTo fromTo = new FromTo(fromto);
 
-		TreeSet<String> resultSet = new TreeSet<String>();
+        // Must be TreeSet due to using method descendingSet below
+        TreeSet<String> resultSet = new TreeSet<String>();
 
-		LOGGER.debug("Query {} Offset {}", query, fromto.offset());
+        LOGGER.debug("Query {} Offset {}", query, fromto.offset());
 
-		JEPQuery jepq = new JEPQuery(query);
+        JEPQuery jepq = new JEPQuery(query);
 
-		while (resultSet.size() < fromto.offset()) {
-			if (!queryRes.isEmpty()) {
+        while (resultSet.size() < fromto.offset()) {
+            if (!queryRes.isEmpty()) {
 
-				for (String row : queryRes) {
+                for (String row : queryRes) {
 
-					try {
-						resultSet = parseQuery(jepq, resultSet, row);
-					} catch (IOException e) {
-						LOGGER.error(
-								"Redis data should not be de-serialized at query : {}",
-								row, e);
-						// throw new APIException(row, Rules.ParsingRef.class);
-						throw new ApiException(row, new ApiError(
-								ErrorRef.PARSING_JSON, row));
-					}
+                    try {
+                        resultSet = parseQuery(jepq, resultSet, row);
+                    } catch (IOException e) {
+                        LOGGER.error(
+                                "Redis data should not be de-serialized at query : {}",
+                                row, e);
+                        throw new ApiException(row, new ApiError(
+                                ErrorRef.PARSING_JSON, row));
+                    }
 
-					// use + 1 to get correct number items
-					if (resultSet.size() == fromto.offset() + 0) {
-						return resultSet.descendingSet();
-					}
-				}
-			} else {
-				return resultSet.descendingSet();
-			}
+                    // use + 1 to get correct number items
+                    if (resultSet.size() == fromto.offset() + 0) {
+                        return resultSet.descendingSet();
+                    }
+                }
+            } else {
+                return resultSet.descendingSet();
+            }
 
-			if (resultSet.size() < fromto.offset()) {
-				LOGGER.debug("pre from {} to {}", fromTo.getFrom(),
-						fromTo.getTo());
+            if (resultSet.size() < fromto.offset()) {
+                LOGGER.debug("pre from {} to {}", fromTo.getFrom(),
+                        fromTo.getTo());
 
-				// fromTo.inc(INC_QUERY_SIZE);
-				fromTo = new FromTo(fromTo, INC_QUERY_SIZE);
-				LOGGER.debug("post from {} to {}", fromTo.getFrom(),
-						fromTo.getTo());
+                fromTo = new FromTo(fromTo, INC_QUERY_SIZE);
 
-				queryRes = readCacheSet(fromTo);
-				LOGGER.debug("RES {}", queryRes.size());
-			}
-		}
+                LOGGER.debug("post from {} to {}", fromTo.getFrom(),
+                        fromTo.getTo());
 
-		return resultSet.descendingSet();
-	}
+                queryRes = readCacheSet(fromTo);
+                LOGGER.debug("RES {}", queryRes.size());
+            }
+        }
 
-	private TreeSet<String> parseQuery(JEPQuery jepq,
-			TreeSet<String> resultSet, String statejson) throws IOException,
-			ApiException {
-		ObjectMapper mapper = new ObjectMapper();
-		JsonNode node = null;
+        return resultSet.descendingSet();
+    }
 
-		node = mapper.readTree(statejson);
+    private TreeSet<String> parseQuery(JEPQuery jepq,
+            TreeSet<String> resultSet, String statejson) throws IOException,
+            ApiException {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode node = null;
 
-		Set<String> var = jepq.getVariables();
+        node = mapper.readTree(statejson);
 
-		// Get fields and add them
-		Map<String, String> parmaters = new HashMap<String, String>();
-		for (String v : var) {
-			if (node.has(v)) {
-				parmaters.put(v, node.get(v).toString());
-			} else {
-				// throw new APIException(v,
-				// Rules.QueryStatementFieldRef.class);
-				throw new ApiException(v, new ApiError(
-						ErrorRef.QUERY_STATEMENT_FIELD, v));
-			}
-		}
+        Set<String> var = jepq.getVariables();
 
-		try {
-			if (jepq.execute(parmaters)) {
-				resultSet.add(statejson);
-			}
-		} catch (IllegalAccessException e) {
-			LOGGER.error("The query failed for {}", parmaters, e);
-			// throw new APIException(jepq.toString(),
-			// Rules.QueryStatementRef.class);
-			throw new ApiException(jepq.toString(), new ApiError(
-					ErrorRef.QUERY_STATEMENT, jepq.toString()));
-		}
-		return resultSet;
-	}
+        // Get fields and add them
+        Map<String, String> parmaters = new HashMap<String, String>();
+        for (String v : var) {
+            if (node.has(v)) {
+                parmaters.put(v, node.get(v).toString());
+            } else {
+                throw new ApiException(v, new ApiError(
+                        ErrorRef.QUERY_STATEMENT_FIELD, v));
+            }
+        }
+
+        try {
+            if (jepq.execute(parmaters)) {
+                resultSet.add(statejson);
+            }
+        } catch (IllegalAccessException e) {
+            LOGGER.error("The query failed for {}", parmaters, e);
+            throw new ApiException(jepq.toString(), new ApiError(
+                    ErrorRef.QUERY_STATEMENT, jepq.toString()));
+        }
+        return resultSet;
+    }
 
 }
