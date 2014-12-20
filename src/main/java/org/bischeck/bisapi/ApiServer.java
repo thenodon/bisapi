@@ -348,7 +348,7 @@ public class ApiServer {
 					Key mesg = null;
 					try {
 						Keys keys = new Keys(jedisPool);
-						mesg = keys.getByKey(LabelText.METRIC_KEY,
+						mesg = keys.getByKey("",
 								LabelText.ALL_KEYS);
 						response.type("application/json");
 					} finally {
@@ -411,7 +411,7 @@ public class ApiServer {
 					Key mesg = null;
 					try {
 						Keys keys = new Keys(jedisPool);
-						mesg = keys.getByKey(LabelText.METRIC_KEY,
+						mesg = keys.getByKey("",
 								request.params("key"));
 						response.type("application/json");
 					} finally {
