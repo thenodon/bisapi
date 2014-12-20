@@ -29,75 +29,14 @@ import org.bischeck.bisapi.redis.JedisPoolWrapper;
 
 import redis.clients.jedis.Jedis;
 
-
-
 public class Keys {
 
     private JedisPoolWrapper jedisPool;
 
-//    private final RestxErrors errors;
+    // private final RestxErrors errors;
 
     public Keys(JedisPoolWrapper jedisPool) {
         this.jedisPool = jedisPool;
-    }
-
-    //@GET("/v1/state")
-    public Key stateKeyAll() {
-
-        return getByKey(LabelText.STATE_KEY, LabelText.ALL_KEYS);
-    }
-
-    //@GET("/v1/keys/state")
-    public Key stateKey() {
-
-        return getByKey(LabelText.STATE_KEY, LabelText.ALL_KEYS);
-    }
-
-    //@GET("/v1/keys/state/{key}")
-    public Key stateKey(String key) {
-        // key can end with * as a wildcard like host1* will retrieve all keys
-        // that begins with host1
-        return getByKey(LabelText.STATE_KEY, key);
-    }
-
-    //@GET("/v1/notification")
-    public Key notificationKeyAll() {
-
-        return getByKey(LabelText.NOTIFICATION_KEY, LabelText.ALL_KEYS);
-    }
-
-    //@GET("/v1/keys/notification")
-    public Key notificationKey() {
-
-        return getByKey(LabelText.NOTIFICATION_KEY, LabelText.ALL_KEYS);
-    }
-
-    //@GET("/v1/keys/notification/{key}")
-    public Key notificationKey(String key) {
-        // key can end with * as a wildcard like host1* will retrieve all keys
-        // that begins with host1
-        return getByKey(LabelText.NOTIFICATION_KEY, key);
-
-    }
-
-    //@GET("/v1/metric")
-    public Key metricsKeyAll() {
-
-        return getByKey("", LabelText.ALL_KEYS);
-    }
-
-    //@GET("/v1/keys/metric")
-    public Key metricsKey() {
-
-        return getByKey("", LabelText.ALL_KEYS);
-    }
-
-    //@GET("/v1/keys/metric/{key}")
-    public Key metricsKey(String key) {
-        // key can end with * as a wildcard like host1* will retrieve all keys
-        // that begins with host1
-        return getByKey("", key);
-
     }
 
     public Key getByKey(String prefix, String key) {
@@ -132,11 +71,11 @@ public class Keys {
             // Get all the state keys
             keys = jedis.keys(prefix + searchKey);
             if (keys.isEmpty()) {
-//                throw errors
-//                        .on(Rules.KeyNoExistsRef.class)
-//                        .set(Rules.KeyNoExistsRef.KEY,
-//                                searchKey.substring(searchKey.indexOf('/') + 1))
-//                        .raise();
+                // throw errors
+                // .on(Rules.KeyNoExistsRef.class)
+                // .set(Rules.KeyNoExistsRef.KEY,
+                // searchKey.substring(searchKey.indexOf('/') + 1))
+                // .raise();
             }
 
             res = selectKeys(keys, jedis);
@@ -159,11 +98,11 @@ public class Keys {
             // Get all the state keys
             keys = jedis.keys(prefix + searchKey);
             if (keys.isEmpty()) {
-//                throw errors
-//                        .on(Rules.KeyNoExistsRef.class)
-//                        .set(Rules.KeyNoExistsRef.KEY,
-//                                searchKey.substring(searchKey.indexOf('/') + 1))
-//                        .raise();
+                // throw errors
+                // .on(Rules.KeyNoExistsRef.class)
+                // .set(Rules.KeyNoExistsRef.KEY,
+                // searchKey.substring(searchKey.indexOf('/') + 1))
+                // .raise();
             }
             Set<String> filterKeys = filteredKeys(keys, jedis);
 

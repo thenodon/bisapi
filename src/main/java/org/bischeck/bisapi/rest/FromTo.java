@@ -22,102 +22,96 @@ package org.bischeck.bisapi.rest;
 import java.util.Optional;
 
 public class FromTo {
-	private static final Integer FROM_DEFAULT = 0;
-	private static final Integer TO_DEFAULT = 99;
+    private static final Integer FROM_DEFAULT = 0;
+    private static final Integer TO_DEFAULT = 99;
 
-	private Integer from;
-	private Integer to;
-	private Integer offset;
+    private Integer from;
+    private Integer to;
+    private Integer offset;
 
-	public FromTo(Optional<String> from, Optional<String> to) {
+    public FromTo(Optional<String> from, Optional<String> to) {
 
-		this.from = validateFrom(from);
-		this.to = validateTo(this.from, to);
-		if (this.from < 0 || this.to < -1) {
-			throw new IllegalArgumentException(
-					"From must be  >= 0 or empty and to must be empty, -1 or >= 0");
-		}
-	}
+        this.from = validateFrom(from);
+        this.to = validateTo(this.from, to);
+        if (this.from < 0 || this.to < -1) {
+            throw new IllegalArgumentException(
+                    "From must be  >= 0 or empty and to must be empty, -1 or >= 0");
+        }
+    }
 
-	public FromTo(Integer from, Integer to) {
+    public FromTo(Integer from, Integer to) {
 
-		this.from = from;
-		this.to = to;
-		if (this.from < 0 || this.to < -1) {
-			throw new IllegalArgumentException(
-					"From must be  >= 0 or empty and to must be empty, -1 or >= 0");
-		}
-		this.offset = to - from + 1;
-	}
+        this.from = from;
+        this.to = to;
+        if (this.from < 0 || this.to < -1) {
+            throw new IllegalArgumentException(
+                    "From must be  >= 0 or empty and to must be empty, -1 or >= 0");
+        }
+        this.offset = to - from + 1;
+    }
 
-	public FromTo(FromTo fromto) {
-		this.from = fromto.getFrom();
-		this.to = fromto.getTo();
-	}
+    public FromTo(FromTo fromto) {
+        this.from = fromto.getFrom();
+        this.to = fromto.getTo();
+    }
 
-	public FromTo(FromTo fromto, int inc) {
-		this.from = fromto.getTo() + 1;
-		this.to = this.from + inc;
-	}
+    public FromTo(FromTo fromto, int inc) {
+        this.from = fromto.getTo() + 1;
+        this.to = this.from + inc;
+    }
 
-	private Integer validateTo(Integer from, Optional<String> to) {
-		if (to.isPresent()) {
-			String toStr = to.get().trim();
+    private Integer validateTo(Integer from, Optional<String> to) {
+        if (to.isPresent()) {
+            String toStr = to.get().trim();
 
-			if (isOffSet(toStr)) {
-				offset = Integer.valueOf(toStr.substring(1).trim());
-				return getCount(from, toStr);
-			} else {
-				offset = getPos(toStr) - from + 1;
-				return getPos(toStr);
-			}
-		} else {
-			offset = TO_DEFAULT + 1;
-			return from + TO_DEFAULT;
-		}
-	}
+            if (isOffSet(toStr)) {
+                offset = Integer.valueOf(toStr.substring(1).trim());
+                return getCount(from, toStr);
+            } else {
+                offset = getPos(toStr) - from + 1;
+                return getPos(toStr);
+            }
+        } else {
+            offset = TO_DEFAULT + 1;
+            return from + TO_DEFAULT;
+        }
+    }
 
-	private Integer validateFrom(Optional<String> from) {
-		if (from.isPresent()) {
-			return Integer.valueOf(from.get().trim());
-		} else {
-			return FROM_DEFAULT;
-		}
-	}
+    private Integer validateFrom(Optional<String> from) {
+        if (from.isPresent()) {
+            return Integer.valueOf(from.get().trim());
+        } else {
+            return FROM_DEFAULT;
+        }
+    }
 
-	public Integer getFrom() {
-		return from;
-	}
+    public Integer getFrom() {
+        return from;
+    }
 
-	public Integer getTo() {
-		return to;
-	}
+    public Integer getTo() {
+        return to;
+    }
 
-	private boolean isOffSet(String toStr) {
+    private boolean isOffSet(String toStr) {
 
-		if (toStr.length() > 0 && toStr.charAt(0) == '+') {
-			return true;
-		}
+        if (toStr.length() > 0 && toStr.charAt(0) == '+') {
+            return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	private Integer getPos(String toStr) {
-		return Integer.valueOf(toStr);
-	}
+    private Integer getPos(String toStr) {
+        return Integer.valueOf(toStr);
+    }
 
-	private Integer getCount(Integer fromIndex, String toIndexStr) {
-		return fromIndex + Integer.valueOf(toIndexStr.substring(1).trim()) - 1;
+    private Integer getCount(Integer fromIndex, String toIndexStr) {
+        return fromIndex + Integer.valueOf(toIndexStr.substring(1).trim()) - 1;
 
-	}
+    }
 
-//	public void inc(int i) {
-//		from = to + 1;
-//		to = from + i;
-//
-//	}
-
-	public Integer offset() {
-		return offset;
-	}
+    public Integer offset() {
+        return offset;
+    }
 }
