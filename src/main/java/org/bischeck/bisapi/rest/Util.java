@@ -9,6 +9,11 @@ import org.bischeck.bisapi.redis.JedisPoolWrapper;
 import redis.clients.jedis.Jedis;
 
 public class Util {
+
+    private Util() {
+
+    }
+
     public static Set<Link> getAllMetricLinks(String key, String prefix,
             JedisPoolWrapper jedisPool2) throws ApiException {
         Jedis jedis = null;

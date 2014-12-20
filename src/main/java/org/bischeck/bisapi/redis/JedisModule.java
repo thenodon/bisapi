@@ -29,14 +29,15 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
 public class JedisModule {
     private final static Logger LOGGER = LoggerFactory
             .getLogger(JedisModule.class);
     private final static String JEDIS_PROPERTIES_FILE = "jedis.properties";
     private static JedisPoolWrapper jedisPool;
 
+    private JedisModule() {
+
+    }
 
     public static synchronized JedisPoolWrapper datasource() {
         if (jedisPool == null) {

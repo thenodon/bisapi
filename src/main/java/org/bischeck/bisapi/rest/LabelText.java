@@ -1,6 +1,7 @@
 package org.bischeck.bisapi.rest;
 
 public class LabelText {
+
     public static final String ALL_KEYS = "*";
 
     public static final String STATE_KEY = "state/";
@@ -24,4 +25,7 @@ public class LabelText {
     static final String REL_METRIC = "metric";
     static final String REL_AGGREGATION = "aggregation";
 
+    private LabelText() {
+
+    }
 }
