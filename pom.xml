@@ -67,6 +67,14 @@
    <version>3.1.0</version>
   </dependency>
 
+
+  <dependency>
+   <groupId>junit</groupId>
+   <artifactId>junit</artifactId>
+   <version>4.11</version>
+   <scope>test</scope>
+  </dependency>
+
   <dependency>
    <groupId>org.testng</groupId>
    <artifactId>testng</artifactId>
@@ -148,6 +156,69 @@
      </execution>
     </executions>
    </plugin>
+
+<!-- 
+   <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <version>2.17</version>
+    <configuration>
+     <forkCount>1</forkCount>
+     <reuseForks>true</reuseForks>
+    </configuration>
+    <executions>
+     <execution>
+      <id>default-test</id>
+      <phase>test</phase>
+      <goals>
+       <goal>test</goal>
+      </goals>
+     </execution>
+    </executions>
+   </plugin>
+ -->
+   <plugin>
+    <artifactId>maven-failsafe-plugin</artifactId>
+    <version>2.6</version>
+    <executions>
+     <execution>
+      <goals>
+       <goal>integration-test</goal>
+       <goal>verify</goal>
+      </goals>
+     </execution>
+    </executions>
+   </plugin>
+
+
+   <plugin>
+    <groupId>org.jacoco</groupId>
+    <artifactId>jacoco-maven-plugin</artifactId>
+    <version>0.7.2.201409121644</version>
+    <executions>
+
+     <execution>
+      <id>default-prepare-agent</id>
+      <goals>
+       <goal>prepare-agent</goal>
+      </goals>
+
+     </execution>
+
+     <!-- Ensures that the code coverage report for unit tests is created 
+      after unit tests have been run. -->
+     <execution>
+      <id>post-unit-test</id>
+      <phase>test</phase>
+      <goals>
+       <goal>report</goal>
+      </goals>
+
+     </execution>
+    </executions>
+
+   </plugin>
+
   </plugins>
  </build>
 </project>
