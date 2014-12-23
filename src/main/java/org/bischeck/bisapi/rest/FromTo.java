@@ -64,7 +64,7 @@ public class FromTo {
         if (to.isPresent()) {
             String toStr = to.get().trim();
 
-            if (isOffSet(toStr)) {
+            if (checkOffSet(toStr)) {
                 offset = Integer.valueOf(toStr.substring(1).trim());
                 return getCount(from, toStr);
             } else {
@@ -93,7 +93,7 @@ public class FromTo {
         return to;
     }
 
-    private boolean isOffSet(String toStr) {
+    private boolean checkOffSet(String toStr) {
 
         if (toStr.length() > 0 && toStr.charAt(0) == '+') {
             return true;
@@ -111,7 +111,7 @@ public class FromTo {
 
     }
 
-    public Integer offset() {
+    public Integer hasOffset() {
         return offset;
     }
 }

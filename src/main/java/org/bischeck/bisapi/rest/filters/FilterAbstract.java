@@ -201,11 +201,11 @@ public abstract class FilterAbstract {
         // Must be TreeSet due to using method descendingSet below
         TreeSet<String> resultSet = new TreeSet<String>();
 
-        LOGGER.debug("Query {} Offset {}", query, fromto.offset());
+        LOGGER.debug("Query {} Offset {}", query, fromto.hasOffset());
 
         JEPQuery jepq = new JEPQuery(query);
 
-        while (resultSet.size() < fromto.offset()) {
+        while (resultSet.size() < fromto.hasOffset()) {
             if (!queryRes.isEmpty()) {
 
                 for (String row : queryRes) {
@@ -221,7 +221,7 @@ public abstract class FilterAbstract {
                     }
 
                     // use + 1 to get correct number items
-                    if (resultSet.size() == fromto.offset() + 0) {
+                    if (resultSet.size() == fromto.hasOffset() + 0) {
                         return resultSet.descendingSet();
                     }
                 }
@@ -229,7 +229,7 @@ public abstract class FilterAbstract {
                 return resultSet.descendingSet();
             }
 
-            if (resultSet.size() < fromto.offset()) {
+            if (resultSet.size() < fromto.hasOffset()) {
                 LOGGER.debug("pre from {} to {}", fromTo.getFrom(),
                         fromTo.getTo());
 
