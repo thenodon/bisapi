@@ -5,7 +5,6 @@ import java.util.Set;
 
 public class PostStatus extends ResponseAbstract implements ResponseInf {
     
-    private String status;
     private String key;
     private Set<Link> links;
     private Set<String> result;
