@@ -41,395 +41,388 @@ import com.codahale.metrics.Timer;
 import static spark.Spark.*;
 
 public class ApiServer {
-	public static final String WEB_INF_LOCATION = "src/main/webapp/WEB-INF/web.xml";
-	public static final String WEB_APP_LOCATION = "src/main/webapp";
-	private static String baseUrl;
+    public static final String WEB_INF_LOCATION = "src/main/webapp/WEB-INF/web.xml";
+    public static final String WEB_APP_LOCATION = "src/main/webapp";
 
-	public static void main(String[] args) throws Exception {
-		int port = Integer.valueOf(Optional.ofNullable(System.getenv("PORT"))
-				.orElse(Integer.toString(SPARK_DEFAULT_PORT)));
+    private ApiServer() {
 
-		SparkBase.setPort(port);
+    }
 
-		JedisPoolWrapper jedisPool = JedisModule.datasource();
+    public static void main(String[] args) throws Exception {
+        int port = Integer.valueOf(Optional.ofNullable(System.getenv("PORT"))
+                .orElse(Integer.toString(SPARK_DEFAULT_PORT)));
 
-		exception(ApiException.class, (e, request, response) -> {
-			response.type("application/json");
-			if (e instanceof ApiException
-					&& ((ApiException) e).getError() != null) {
-				response.body(((ApiException) e).getError().toString());
-				response.status(((ApiException) e).getError().getStatus());
-			} else {
-				response.status(500);
-				response.body(ApiError.defaultError());
-			}
-		});
+        SparkBase.setPort(port);
 
-		// exception(NullPointerException.class, (e, request, response) -> {
-		//
-		// response.type("application/json");
-		// response.status(50);
-		// response.body(ApiError.defaultError());
-		//
-		// });
+        JedisPoolWrapper jedisPool = JedisModule.datasource();
 
-		metricGet(jedisPool);
-		stateGet(jedisPool);
-		notificationGet(jedisPool);
-		keysGet(jedisPool);
+        exception(ApiException.class, (e, request, response) -> {
+            response.type("application/json");
+            if (e instanceof ApiException
+                    && ((ApiException) e).getError() != null) {
+                response.body(((ApiException) e).getError().toString());
+                response.status(((ApiException) e).getError().getStatus());
+            } else {
+                response.status(500);
+                response.body(ApiError.defaultError());
+            }
+        });
 
-	}
+        // exception(NullPointerException.class, (e, request, response) -> {
+        //
+        // response.type("application/json");
+        // response.status(50);
+        // response.body(ApiError.defaultError());
+        //
+        // });
 
-	private static void metricGet(JedisPoolWrapper jedisPool) {
-		get("/v1/metric/:key",
-				(request, response) -> {
+        metricGet(jedisPool);
+        stateGet(jedisPool);
+        notificationGet(jedisPool);
+        keysGet(jedisPool);
 
-					final Timer timer = MetricsManager.getTimer(Metric.class,
-							"GET-key");
-					final Timer.Context ctx = timer.time();
-					Message mesg = null;
-					try {
-						Metric metric = new Metric(jedisPool);
-						Optional<String> f = Optional.ofNullable(request
-								.queryParams("f"));
-						Optional<String> q = Optional.ofNullable(request
-								.queryParams("q"));
-						Optional<String> from = Optional.ofNullable(request
-								.queryParams("from"));
-						Optional<String> to = Optional.ofNullable(request
-								.queryParams("to"));
+    }
 
-						mesg = metric.metric(request.params(":key"), f, q,
-								from, to);
+    private static void metricGet(JedisPoolWrapper jedisPool) {
+        get("/v1/metric/:key",
+                (request, response) -> {
 
-						response.type("application/json");
-					} finally {
-						Long duration = ctx.stop() / MetricsManager.TO_MILLI;
-						if (mesg != null) {
-							mesg.setProcessingTime(duration);
-						}
-					}
-					return mesg.toString();
-				});
+                    final Timer timer = MetricsManager.getTimer(Metric.class,
+                            "GET-key");
+                    final Timer.Context ctx = timer.time();
+                    Message mesg = null;
+                    try {
+                        Metric metric = new Metric(jedisPool);
+                        Optional<String> f = Optional.ofNullable(request
+                                .queryParams("f"));
+                        Optional<String> q = Optional.ofNullable(request
+                                .queryParams("q"));
+                        Optional<String> from = Optional.ofNullable(request
+                                .queryParams("from"));
+                        Optional<String> to = Optional.ofNullable(request
+                                .queryParams("to"));
 
-	}
+                        mesg = metric.metric(request.params(":key"), f, q,
+                                from, to);
 
-	private static void stateGet(JedisPoolWrapper jedisPool) {
-		get("/v1/state/:key",
-				(request, response) -> {
-					final Timer timer = MetricsManager.getTimer(State.class,
-							"GET-key");
-					final Timer.Context ctx = timer.time();
-					Message mesg = null;
-					try {
-						State state = new State(jedisPool);
-						Optional<String> f = Optional.ofNullable(request
-								.queryParams("f"));
-						Optional<String> q = Optional.ofNullable(request
-								.queryParams("q"));
-						Optional<String> from = Optional.ofNullable(request
-								.queryParams("from"));
-						Optional<String> to = Optional.ofNullable(request
-								.queryParams("to"));
+                        response.type("application/json");
+                    } finally {
+                        Long duration = ctx.stop() / MetricsManager.TO_MILLI;
+                        if (mesg != null) {
+                            mesg.setProcessingTime(duration);
+                        }
+                    }
+                    return mesg.toString();
+                });
 
-						mesg = state.state(request.params(":key"), f, q, from,
-								to);
+    }
 
-						response.type("application/json");
-					} finally {
-						Long duration = ctx.stop() / MetricsManager.TO_MILLI;
-						if (mesg != null) {
-							mesg.setProcessingTime(duration);
-						}
-					}
-					return mesg.toString();
-				});
+    private static void stateGet(JedisPoolWrapper jedisPool) {
+        get("/v1/state/:key",
+                (request, response) -> {
+                    final Timer timer = MetricsManager.getTimer(State.class,
+                            "GET-key");
+                    final Timer.Context ctx = timer.time();
+                    Message mesg = null;
+                    try {
+                        State state = new State(jedisPool);
+                        Optional<String> f = Optional.ofNullable(request
+                                .queryParams("f"));
+                        Optional<String> q = Optional.ofNullable(request
+                                .queryParams("q"));
+                        Optional<String> from = Optional.ofNullable(request
+                                .queryParams("from"));
+                        Optional<String> to = Optional.ofNullable(request
+                                .queryParams("to"));
 
-		get("/v1/state/status/all",
-				(request, response) -> {
-					final Timer timer = MetricsManager.getTimer(State.class,
-							"GET-all");
-					final Timer.Context ctx = timer.time();
+                        mesg = state.state(request.params(":key"), f, q, from,
+                                to);
 
-					StateMessage mesg = null;
-					try {
-						State state = new State(jedisPool);
-						mesg = state.statusLevel("");
-						response.type("application/json");
-					} finally {
-						Long duration = ctx.stop() / MetricsManager.TO_MILLI;
-						if (mesg != null) {
-							mesg.setProcessingTime(duration);
-						}
-					}
-					return mesg.toString();
-				});
+                        response.type("application/json");
+                    } finally {
+                        Long duration = ctx.stop() / MetricsManager.TO_MILLI;
+                        if (mesg != null) {
+                            mesg.setProcessingTime(duration);
+                        }
+                    }
+                    return mesg.toString();
+                });
 
-		get("/v1/state/status/ok", (request, response) -> {
-			final Timer timer = MetricsManager.getTimer(State.class, "GET-ok");
-			final Timer.Context ctx = timer.time();
+        get("/v1/state/status/all",
+                (request, response) -> {
+                    final Timer timer = MetricsManager.getTimer(State.class,
+                            "GET-all");
+                    final Timer.Context ctx = timer.time();
 
-			StateMessage mesg = null;
-			try {
-				State state = new State(jedisPool);
-				mesg = state.statusLevel("OK");
-				response.type("application/json");
-			} finally {
-				Long duration = ctx.stop() / MetricsManager.TO_MILLI;
-				if (mesg != null) {
-					mesg.setProcessingTime(duration);
-				}
-			}
-			return mesg.toString();
-		});
+                    StateMessage mesg = null;
+                    try {
+                        State state = new State(jedisPool);
+                        mesg = state.statusLevel("");
+                        response.type("application/json");
+                    } finally {
+                        Long duration = ctx.stop() / MetricsManager.TO_MILLI;
+                        if (mesg != null) {
+                            mesg.setProcessingTime(duration);
+                        }
+                    }
+                    return mesg.toString();
+                });
 
-		get("/v1/state/status/critical",
-				(request, response) -> {
-					final Timer timer = MetricsManager.getTimer(State.class,
-							"GET-critical");
-					final Timer.Context ctx = timer.time();
+        get("/v1/state/status/ok", (request, response) -> {
+            final Timer timer = MetricsManager.getTimer(State.class, "GET-ok");
+            final Timer.Context ctx = timer.time();
 
-					StateMessage mesg = null;
-					try {
-						State state = new State(jedisPool);
-						mesg = state.statusLevel("CRITICAL");
-						response.type("application/json");
-					} finally {
-						Long duration = ctx.stop() / MetricsManager.TO_MILLI;
-						if (mesg != null) {
-							mesg.setProcessingTime(duration);
-						}
-					}
-					return mesg.toString();
-				});
+            StateMessage mesg = null;
+            try {
+                State state = new State(jedisPool);
+                mesg = state.statusLevel("OK");
+                response.type("application/json");
+            } finally {
+                Long duration = ctx.stop() / MetricsManager.TO_MILLI;
+                if (mesg != null) {
+                    mesg.setProcessingTime(duration);
+                }
+            }
+            return mesg.toString();
+        });
 
-		get("/v1/state/status/warning",
-				(request, response) -> {
-					final Timer timer = MetricsManager.getTimer(State.class,
-							"GET-warning");
-					final Timer.Context ctx = timer.time();
+        get("/v1/state/status/critical",
+                (request, response) -> {
+                    final Timer timer = MetricsManager.getTimer(State.class,
+                            "GET-critical");
+                    final Timer.Context ctx = timer.time();
 
-					StateMessage mesg = null;
-					try {
-						State state = new State(jedisPool);
-						mesg = state.statusLevel("WARNING");
-						response.type("application/json");
-					} finally {
-						Long duration = ctx.stop() / MetricsManager.TO_MILLI;
-						if (mesg != null) {
-							mesg.setProcessingTime(duration);
-						}
-					}
-					return mesg.toString();
-				});
+                    StateMessage mesg = null;
+                    try {
+                        State state = new State(jedisPool);
+                        mesg = state.statusLevel("CRITICAL");
+                        response.type("application/json");
+                    } finally {
+                        Long duration = ctx.stop() / MetricsManager.TO_MILLI;
+                        if (mesg != null) {
+                            mesg.setProcessingTime(duration);
+                        }
+                    }
+                    return mesg.toString();
+                });
 
-		get("/v1/state/status/unknown",
-				(request, response) -> {
-					final Timer timer = MetricsManager.getTimer(State.class,
-							"GET-unknown");
-					final Timer.Context ctx = timer.time();
+        get("/v1/state/status/warning",
+                (request, response) -> {
+                    final Timer timer = MetricsManager.getTimer(State.class,
+                            "GET-warning");
+                    final Timer.Context ctx = timer.time();
 
-					StateMessage mesg = null;
-					try {
-						State state = new State(jedisPool);
-						mesg = state.statusLevel("UNKNOWN");
-						response.type("application/json");
-					} finally {
-						Long duration = ctx.stop() / MetricsManager.TO_MILLI;
-						if (mesg != null) {
-							mesg.setProcessingTime(duration);
-						}
-					}
-					return mesg.toString();
-				});
-	}
+                    StateMessage mesg = null;
+                    try {
+                        State state = new State(jedisPool);
+                        mesg = state.statusLevel("WARNING");
+                        response.type("application/json");
+                    } finally {
+                        Long duration = ctx.stop() / MetricsManager.TO_MILLI;
+                        if (mesg != null) {
+                            mesg.setProcessingTime(duration);
+                        }
+                    }
+                    return mesg.toString();
+                });
 
-	private static void notificationGet(JedisPoolWrapper jedisPool) {
-		get("/v1/notification/:key",
-				(request, response) -> {
-					final Timer timer = MetricsManager.getTimer(
-							Notification.class, "GET-key");
-					final Timer.Context ctx = timer.time();
-					Message mesg = null;
-					try {
-						Notification notification = new Notification(jedisPool);
-						Optional<String> f = Optional.ofNullable(request
-								.queryParams("f"));
-						Optional<String> q = Optional.ofNullable(request
-								.queryParams("q"));
-						Optional<String> from = Optional.ofNullable(request
-								.queryParams("from"));
-						Optional<String> to = Optional.ofNullable(request
-								.queryParams("to"));
+        get("/v1/state/status/unknown",
+                (request, response) -> {
+                    final Timer timer = MetricsManager.getTimer(State.class,
+                            "GET-unknown");
+                    final Timer.Context ctx = timer.time();
 
-						mesg = notification.notification(
-								request.params(":key"), f, q, from, to);
+                    StateMessage mesg = null;
+                    try {
+                        State state = new State(jedisPool);
+                        mesg = state.statusLevel("UNKNOWN");
+                        response.type("application/json");
+                    } finally {
+                        Long duration = ctx.stop() / MetricsManager.TO_MILLI;
+                        if (mesg != null) {
+                            mesg.setProcessingTime(duration);
+                        }
+                    }
+                    return mesg.toString();
+                });
+    }
 
-						response.type("application/json");
-					} finally {
-						Long duration = ctx.stop() / MetricsManager.TO_MILLI;
-						if (mesg != null) {
-							mesg.setProcessingTime(duration);
-						}
-					}
-					return mesg.toString();
-				});
+    private static void notificationGet(JedisPoolWrapper jedisPool) {
+        get("/v1/notification/:key",
+                (request, response) -> {
+                    final Timer timer = MetricsManager.getTimer(
+                            Notification.class, "GET-key");
+                    final Timer.Context ctx = timer.time();
+                    Message mesg = null;
+                    try {
+                        Notification notification = new Notification(jedisPool);
+                        Optional<String> f = Optional.ofNullable(request
+                                .queryParams("f"));
+                        Optional<String> q = Optional.ofNullable(request
+                                .queryParams("q"));
+                        Optional<String> from = Optional.ofNullable(request
+                                .queryParams("from"));
+                        Optional<String> to = Optional.ofNullable(request
+                                .queryParams("to"));
 
-		get("/v1/notification/status/alerts",
-				(request, response) -> {
-					final Timer timer = MetricsManager.getTimer(
-							Notification.class, "GET-alert");
-					final Timer.Context ctx = timer.time();
+                        mesg = notification.notification(
+                                request.params(":key"), f, q, from, to);
 
-					StateMessage mesg = null;
-					try {
-						Notification notification = new Notification(jedisPool);
-						mesg = notification.notifications("alert");
-						response.type("application/json");
-					} finally {
-						Long duration = ctx.stop() / MetricsManager.TO_MILLI;
-						if (mesg != null) {
-							mesg.setProcessingTime(duration);
-						}
-					}
-					return mesg.toString();
+                        response.type("application/json");
+                    } finally {
+                        Long duration = ctx.stop() / MetricsManager.TO_MILLI;
+                        if (mesg != null) {
+                            mesg.setProcessingTime(duration);
+                        }
+                    }
+                    return mesg.toString();
+                });
 
-				});
-	}
+        get("/v1/notification/status/alerts",
+                (request, response) -> {
+                    final Timer timer = MetricsManager.getTimer(
+                            Notification.class, "GET-alert");
+                    final Timer.Context ctx = timer.time();
 
-	private static void keysGet(JedisPoolWrapper jedisPool) {
-		get("/v1/keys/state",
-				(request, response) -> {
-					final Timer timer = MetricsManager.getTimer(Keys.class,
-							"GET-state");
-					final Timer.Context ctx = timer.time();
+                    StateMessage mesg = null;
+                    try {
+                        Notification notification = new Notification(jedisPool);
+                        mesg = notification.notifications("alert");
+                        response.type("application/json");
+                    } finally {
+                        Long duration = ctx.stop() / MetricsManager.TO_MILLI;
+                        if (mesg != null) {
+                            mesg.setProcessingTime(duration);
+                        }
+                    }
+                    return mesg.toString();
 
-					Key mesg = null;
-					try {
-						Keys keys = new Keys(jedisPool);
-						mesg = keys.getByKey(LabelText.STATE_KEY,
-								LabelText.ALL_KEYS);
-						response.type("application/json");
-					} finally {
-						Long duration = ctx.stop() / MetricsManager.TO_MILLI;
-						if (mesg != null) {
-							mesg.setProcessingTime(duration);
-						}
-					}
-					return mesg.toString();
-				});
+                });
+    }
 
-		get("/v1/keys/notification",
-				(request, response) -> {
-					final Timer timer = MetricsManager.getTimer(Keys.class,
-							"GET-notification");
-					final Timer.Context ctx = timer.time();
+    private static void keysGet(JedisPoolWrapper jedisPool) {
+        get("/v1/keys/state",
+                (request, response) -> {
+                    final Timer timer = MetricsManager.getTimer(Keys.class,
+                            "GET-state");
+                    final Timer.Context ctx = timer.time();
 
-					Key mesg = null;
-					try {
-						Keys keys = new Keys(jedisPool);
-						mesg = keys.getByKey(LabelText.NOTIFICATION_KEY,
-								LabelText.ALL_KEYS);
-						response.type("application/json");
-					} finally {
-						Long duration = ctx.stop() / MetricsManager.TO_MILLI;
-						if (mesg != null) {
-							mesg.setProcessingTime(duration);
-						}
-					}
-					return mesg.toString();
-				});
-		get("/v1/keys/metric",
-				(request, response) -> {
-					final Timer timer = MetricsManager.getTimer(Keys.class,
-							"GET-metric-all");
-					final Timer.Context ctx = timer.time();
+                    Key mesg = null;
+                    try {
+                        Keys keys = new Keys(jedisPool);
+                        mesg = keys.getByKey(LabelText.STATE_KEY,
+                                LabelText.ALL_KEYS);
+                        response.type("application/json");
+                    } finally {
+                        Long duration = ctx.stop() / MetricsManager.TO_MILLI;
+                        if (mesg != null) {
+                            mesg.setProcessingTime(duration);
+                        }
+                    }
+                    return mesg.toString();
+                });
 
-					Key mesg = null;
-					try {
-						Keys keys = new Keys(jedisPool);
-						mesg = keys.getByKey("",
-								LabelText.ALL_KEYS);
-						response.type("application/json");
-					} finally {
-						Long duration = ctx.stop() / MetricsManager.TO_MILLI;
-						if (mesg != null) {
-							mesg.setProcessingTime(duration);
-						}
-					}
-					return mesg.toString();
-				});
+        get("/v1/keys/notification",
+                (request, response) -> {
+                    final Timer timer = MetricsManager.getTimer(Keys.class,
+                            "GET-notification");
+                    final Timer.Context ctx = timer.time();
 
-		get("/v1/keys/state/:key",
-				(request, response) -> {
-					final Timer timer = MetricsManager.getTimer(Keys.class,
-							"GET-state-key");
-					final Timer.Context ctx = timer.time();
+                    Key mesg = null;
+                    try {
+                        Keys keys = new Keys(jedisPool);
+                        mesg = keys.getByKey(LabelText.NOTIFICATION_KEY,
+                                LabelText.ALL_KEYS);
+                        response.type("application/json");
+                    } finally {
+                        Long duration = ctx.stop() / MetricsManager.TO_MILLI;
+                        if (mesg != null) {
+                            mesg.setProcessingTime(duration);
+                        }
+                    }
+                    return mesg.toString();
+                });
+        get("/v1/keys/metric",
+                (request, response) -> {
+                    final Timer timer = MetricsManager.getTimer(Keys.class,
+                            "GET-metric-all");
+                    final Timer.Context ctx = timer.time();
 
-					Key mesg = null;
-					try {
-						Keys keys = new Keys(jedisPool);
-						mesg = keys.getByKey(LabelText.STATE_KEY,
-								request.params(":key"));
-						response.type("application/json");
-					} finally {
-						Long duration = ctx.stop() / MetricsManager.TO_MILLI;
-						if (mesg != null) {
-							mesg.setProcessingTime(duration);
-						}
-					}
-					return mesg.toString();
-				});
+                    Key mesg = null;
+                    try {
+                        Keys keys = new Keys(jedisPool);
+                        mesg = keys.getByKey("", LabelText.ALL_KEYS);
+                        response.type("application/json");
+                    } finally {
+                        Long duration = ctx.stop() / MetricsManager.TO_MILLI;
+                        if (mesg != null) {
+                            mesg.setProcessingTime(duration);
+                        }
+                    }
+                    return mesg.toString();
+                });
 
-		get("/v1/keys/notification/:key",
-				(request, response) -> {
-					final Timer timer = MetricsManager.getTimer(Keys.class,
-							"GET-notification-key");
-					final Timer.Context ctx = timer.time();
+        get("/v1/keys/state/:key",
+                (request, response) -> {
+                    final Timer timer = MetricsManager.getTimer(Keys.class,
+                            "GET-state-key");
+                    final Timer.Context ctx = timer.time();
 
-					Key mesg = null;
-					try {
-						Keys keys = new Keys(jedisPool);
-						mesg = keys.getByKey(LabelText.NOTIFICATION_KEY,
-								request.params(":key"));
-						response.type("application/json");
-					} finally {
-						Long duration = ctx.stop() / MetricsManager.TO_MILLI;
-						if (mesg != null) {
-							mesg.setProcessingTime(duration);
-						}
-					}
-					return mesg.toString();
-				});
+                    Key mesg = null;
+                    try {
+                        Keys keys = new Keys(jedisPool);
+                        mesg = keys.getByKey(LabelText.STATE_KEY,
+                                request.params(":key"));
+                        response.type("application/json");
+                    } finally {
+                        Long duration = ctx.stop() / MetricsManager.TO_MILLI;
+                        if (mesg != null) {
+                            mesg.setProcessingTime(duration);
+                        }
+                    }
+                    return mesg.toString();
+                });
 
-		get("/v1/keys/metric/:key",
-				(request, response) -> {
-					final Timer timer = MetricsManager.getTimer(Keys.class,
-							"GET-metric-key");
-					final Timer.Context ctx = timer.time();
+        get("/v1/keys/notification/:key",
+                (request, response) -> {
+                    final Timer timer = MetricsManager.getTimer(Keys.class,
+                            "GET-notification-key");
+                    final Timer.Context ctx = timer.time();
 
-					Key mesg = null;
-					try {
-						Keys keys = new Keys(jedisPool);
-						mesg = keys.getByKey("",
-								request.params("key"));
-						response.type("application/json");
-					} finally {
-						Long duration = ctx.stop() / MetricsManager.TO_MILLI;
-						if (mesg != null) {
-							mesg.setProcessingTime(duration);
-						}
-					}
-					return mesg.toString();
+                    Key mesg = null;
+                    try {
+                        Keys keys = new Keys(jedisPool);
+                        mesg = keys.getByKey(LabelText.NOTIFICATION_KEY,
+                                request.params(":key"));
+                        response.type("application/json");
+                    } finally {
+                        Long duration = ctx.stop() / MetricsManager.TO_MILLI;
+                        if (mesg != null) {
+                            mesg.setProcessingTime(duration);
+                        }
+                    }
+                    return mesg.toString();
+                });
 
-				});
-	}
+        get("/v1/keys/metric/:key",
+                (request, response) -> {
+                    final Timer timer = MetricsManager.getTimer(Keys.class,
+                            "GET-metric-key");
+                    final Timer.Context ctx = timer.time();
 
-	public static String getBaseUrl() {
-		if (baseUrl == null) {
-			baseUrl = System.getProperty("serverUrl")
-					+ System.getProperty("appUrl");
-		}
-		return baseUrl;
-	}
+                    Key mesg = null;
+                    try {
+                        Keys keys = new Keys(jedisPool);
+                        mesg = keys.getByKey("", request.params("key"));
+                        response.type("application/json");
+                    } finally {
+                        Long duration = ctx.stop() / MetricsManager.TO_MILLI;
+                        if (mesg != null) {
+                            mesg.setProcessingTime(duration);
+                        }
+                    }
+                    return mesg.toString();
+
+                });
+    }
 }
