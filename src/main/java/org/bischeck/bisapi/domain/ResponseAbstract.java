@@ -34,4 +34,5 @@ public abstract class ResponseAbstract {
     static final String WARNING = "warning";
     static final String UNKNOWN = "unknown";
     static final String ALERT = "alert";
+
 }
