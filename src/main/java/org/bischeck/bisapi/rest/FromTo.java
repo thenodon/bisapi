@@ -22,12 +22,12 @@ package org.bischeck.bisapi.rest;
 import java.util.Optional;
 
 public class FromTo {
-    private static final Integer FROM_DEFAULT = 0;
-    private static final Integer TO_DEFAULT = 99;
+    private static final Long FROM_DEFAULT = 0L;
+    private static final Long TO_DEFAULT = 99L;
 
-    private Integer from;
-    private Integer to;
-    private Integer offset;
+    private Long from;
+    private Long to;
+    private Long offset;
 
     public FromTo(Optional<String> from, Optional<String> to) {
 
@@ -40,14 +40,18 @@ public class FromTo {
     }
 
     public FromTo(Integer from, Integer to) {
+    	this(new Long(from),new Long(to));
+    }
 
-        this.from = from;
-        this.to = to;
+    public FromTo(Long from, Long to) {
+
+        this.from = new Long(from);
+        this.to = new Long(to);
         if (this.from < 0 || this.to < -1) {
             throw new IllegalArgumentException(
                     "From must be  >= 0 or empty and to must be empty, -1 or >= 0");
         }
-        this.offset = to - from + 1;
+        this.offset = this.to - this.from + 1;
     }
 
     public FromTo(FromTo fromto) {
@@ -60,12 +64,12 @@ public class FromTo {
         this.to = this.from + inc;
     }
 
-    private Integer validateTo(Integer from, Optional<String> to) {
+    private Long validateTo(Long from, Optional<String> to) {
         if (to.isPresent()) {
             String toStr = to.get().trim();
 
             if (checkOffSet(toStr)) {
-                offset = Integer.valueOf(toStr.substring(1).trim());
+                offset = Long.valueOf(toStr.substring(1).trim());
                 return getCount(from, toStr);
             } else {
                 offset = getPos(toStr) - from + 1;
@@ -77,20 +81,24 @@ public class FromTo {
         }
     }
 
-    private Integer validateFrom(Optional<String> from) {
+    private Long validateFrom(Optional<String> from) {
         if (from.isPresent()) {
-            return Integer.valueOf(from.get().trim());
+            return Long.valueOf(from.get().trim());
         } else {
             return FROM_DEFAULT;
         }
     }
 
-    public Integer getFrom() {
+    public Long getFrom() {
         return from;
     }
 
-    public Integer getTo() {
+    public Long getTo() {
         return to;
+    }
+
+    public Long hasOffset() {
+        return offset;
     }
 
     private boolean checkOffSet(String toStr) {
@@ -102,16 +110,13 @@ public class FromTo {
         return false;
     }
 
-    private Integer getPos(String toStr) {
-        return Integer.valueOf(toStr);
+    private Long getPos(String toStr) {
+        return Long.valueOf(toStr);
     }
 
-    private Integer getCount(Integer fromIndex, String toIndexStr) {
-        return fromIndex + Integer.valueOf(toIndexStr.substring(1).trim()) - 1;
+    private Long getCount(Long fromIndex, String toIndexStr) {
+        return fromIndex + Long.valueOf(toIndexStr.substring(1).trim()) - 1;
 
     }
 
-    public Integer hasOffset() {
-        return offset;
-    }
 }
